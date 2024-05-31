@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import matplotlib.pyplot as plt
-import os
 
 class MLP(nn.Module):
     def __init__(self):
@@ -53,37 +52,30 @@ def compute_loss_surface(x_range, y_range):
     
     return w1, w2, loss_surface
 
-
-save_dir = '/Users/zhaozifan/Desktop/ML_Playground/plots_2D' # Modify this to your file path
-os.makedirs(save_dir, exist_ok=True)
-
-# main
-num_epochs = 50
+# Main
+num_epochs = 500
 for epoch in range(num_epochs):
     optimizer.zero_grad()
     outputs = model(X)
     loss = criterion(outputs, y)
     loss.backward()
     optimizer.step()
-    
+
     param_history.append(get_params().numpy().copy())
-    params_start = param_history[0]
-    params_end = param_history[-1]
-    x_range = [min(params_start[0], params_end[0]) - 1, max(params_start[0], params_end[0]) + 1]
-    y_range = [min(params_start[1], params_end[1]) - 1, max(params_start[1], params_end[1]) + 1]
 
-    w1, w2, loss_surface = compute_loss_surface(x_range, y_range)
+# Plot 
+params_start = param_history[0]
+params_end = param_history[-1]
+x_range = [min(params_start[0], params_end[0]) - 1, max(params_start[0], params_end[0]) + 1]
+y_range = [min(params_start[1], params_end[1]) - 1, max(params_start[1], params_end[1]) + 1]
 
-    # Plot
-    plt.contourf(w1, w2, loss_surface, levels=50, cmap='viridis')
-    plt.colorbar()
-    plt.plot([p[0] for p in param_history], [p[1] for p in param_history], 'r-o')
-    plt.title(f'Loss Landscape and Gradient Descent Steps (Epoch {epoch + 1})')
-    plt.xlabel('Parameter 1')
-    plt.ylabel('Parameter 2')
+w1, w2, loss_surface = compute_loss_surface(x_range, y_range)
 
-    plot_path = os.path.join(save_dir, f'epoch_{epoch + 1}.png')
-    plt.savefig(plot_path)
-    plt.close()
+plt.contourf(w1, w2, loss_surface, levels=50, cmap='viridis')
+plt.colorbar()
+plt.plot([p[0] for p in param_history], [p[1] for p in param_history], 'r-o')
+plt.title('Loss Landscape and Gradient Descent Steps')
+plt.xlabel('Parameter 1')
+plt.ylabel('Parameter 2')
+plt.show()
 
-print(f'Plots saved in {save_dir}')
